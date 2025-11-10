@@ -67,10 +67,10 @@ def read_bvecs(filename):
 
 dist_functions={}
 
-dist_functions["L2"]="<->"
-dist_functions["inner"]="<#>"
+dist_functions["l2"]="<->"
+dist_functions["ip"]="<#>"
 dist_functions["cosine"]="<=>"
-dist_functions["L1"]="<+>"
+dist_functions["l1"]="<+>"
 # dist_functions["hamming"]="<~>"
 # dist_functions["jaccard"]="<%>"
 
