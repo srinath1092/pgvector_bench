@@ -60,7 +60,7 @@ ivf_search_results = {}
 for n_probes in [1,5,10,15]:
     for ivf_list_count in [80,100,120]:
         for dist_func in utils.dist_functions.keys():
-            if dist_func == "l1": continue
+            if dpgbenchist_func == "l1": continue
             logger.set_context(f"ivf_build_{dist_func}_{ivf_list_count}")
             allmetrics.build_ivf_index(dist_func,ivf_list_count,cur,logger)
             logger.write(f"Memory {allmetrics.get_index_size("ivf",cur)}")
