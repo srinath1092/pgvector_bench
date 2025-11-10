@@ -34,15 +34,22 @@ logger:utils.clogger=utils.clogger("log.log")
 
 exact_search_results = {}
 
-for topk in range(5,1000,20):
+for topk in range(80,101,20):
     for dist_func in utils.dist_functions.keys():
         logger.set_context(f"{dist_func}[{topk}][{len(query_vectors)}]")
         allmetrics.dist_query(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
+        exact_search_results[f"{topk}_{dist_func}"] = allmetrics.get_results(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
 
+hnsw_search_results = {}
+for max_cons in [4,8,16,32,64]:
+    for ef_construction_multiplier in [2,4,8]:
+        for dist_func in utils.dist_functions.keys():
+            logger.set_context(f"hnsw_{dist_func}_{max_cons}_{ef_construction_multiplier}")
+            allmetrics.build_hnsw_index(dist_func,max_cons,ef_construction_multiplier*max_cons,cur,logger)
 
-# for max_cons in [4,8,16,32,64]:
-#     for ef_construction_multiplier in [2,4,8]:
-#         for dist_func in utils.dist_functions.keys():
-#             logger.set_context(f"hnsw_{dist_func}_{max_cons}_{ef_construction_multiplier}")
-#             allmetrics.build_hnsw_index(dist_func,max_cons,ef_construction_multiplier*max_cons,cur,logger)
-
+            for topk in range(80,101,20):
+                logger.set_context(f"hnsw::{dist_func}[{topk}][{len(query_vectors)}]")
+                allmetrics.dist_query(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
+                hnsw_search_results[f"{topk}_{dist_func}"] = allmetrics.get_results(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
+        logger.set_context(f"hnsw_recall_{max_cons}_{ef_construction_multiplier}::{dist_func}[{topk}][{len(query_vectors)}]")
+        utils.log_recall(exact_search_results,hnsw_search_results,logger)

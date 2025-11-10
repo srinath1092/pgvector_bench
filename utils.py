@@ -99,5 +99,4 @@ def log_recall(truth,pred,logger:clogger):
             recall_cur += corrects/len(true_vecs)
         recall_cur = recall_cur/len(truth[key])
         recall[key] = recall_cur
-    logger.set_context("recall metrics")
     logger.write(recall)
