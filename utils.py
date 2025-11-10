@@ -1,6 +1,8 @@
+from io import TextIOWrapper
 import numpy as np
+import sys
 
-def read_fvecs(filename):
+def read_fvecs(filename,limit:int=10000):
     """
     Reads a .fvecs file.
     Format: [int32 d] [float32 x d]
@@ -13,7 +15,7 @@ def read_fvecs(filename):
         
     d = a[0]
     # d_dim + d_data = (4 + d*4) bytes / 4 bytes per int32 = 1 + d
-    return a.reshape(-1, d + 1)[:, 1:].copy().view('float32')
+    return a.reshape(-1, d + 1)[:limit, 1:].copy().view('float32')
 
 def read_ivecs(filename):
     """
@@ -62,3 +64,27 @@ def read_bvecs(filename):
         return np.array([], dtype=np.uint8).reshape(0, 0)
         
     return np.array(vectors)
+
+dist_functions={}
+
+dist_functions["L2"]="<->"
+dist_functions["inner"]="<#>"
+dist_functions["cosine"]="<=>"
+dist_functions["L1"]="<+>"
+# dist_functions["hamming"]="<~>"
+# dist_functions["jaccard"]="<%>"
+
+
+class clogger:
+    def __init__(self,path:str):
+        self._path:str=path
+        self._file:TextIOWrapper=open(path,"w")
+        self._context:str="unspecified"
+    def close(self):
+        self._file.close()
+    def set_context(self,context:str):
+        self._context=context
+
+    def write(self,obj):
+        self._file.write(f"[{self._context}] {str(obj)}\n")
+

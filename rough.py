@@ -20,6 +20,8 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
+
+
 print(f"Loading query vectors from {SIFT_FILE}...")
 query_vecs = utils.read_fvecs(SIFT_FILE)
 
