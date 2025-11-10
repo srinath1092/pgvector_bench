@@ -41,7 +41,7 @@ def execute_for_time_2(query:str,cur:psycopg2.extensions.cursor,logger:utils.clo
     cur.execute(f"{query}",args) 
     cur.connection.commit()
     endTime=time.time()
-    logger.write(endTime-startTime)
+    logger.write(f"Time {endTime-startTime}")
 
 
 def build_index(index_name:str,dist_func:str,cur:psycopg2.extensions.cursor,logger:utils.clogger):
@@ -52,7 +52,27 @@ def build_index(index_name:str,dist_func:str,cur:psycopg2.extensions.cursor,logg
 def build_hnsw_index(dist_func:str,max_cons:int,ef_construction:int,cur:psycopg2.extensions.cursor,logger:utils.clogger):
     print(logger._context,"started")
     cur.execute(f"DROP INDEX IF EXISTS hnsw")
+    cur.execute(f"DROP INDEX IF EXISTS ivf")
     cur.connection.commit()
     execute_for_time_2(f"CREATE INDEX hnsw ON sift1m USING hnsw (embedding vector_{dist_func}_ops) with (m={max_cons},ef_construction={ef_construction});",cur,logger)
     print(logger._context,"done")
 
+def build_ivf_index(dist_func:str,ivf_list_count:int,cur:psycopg2.extensions.cursor,logger:utils.clogger):
+    print(logger._context,"started")
+    cur.execute(f"DROP INDEX IF EXISTS hnsw")
+    cur.execute(f"DROP INDEX IF EXISTS ivf")
+    cur.connection.commit()
+    execute_for_time_2(f"CREATE INDEX ivf ON sift1m USING ivfflat (embedding vector_{dist_func}_ops) with (lists={ivf_list_count});",cur,logger)
+    print(logger._context,"done")
+
+
+
+def get_index_size(index_name:str,cur:psycopg2.extensions.cursor):
+    cur.execute(
+    f"""SELECT
+    indexrelname AS index_name,
+    pg_size_pretty(pg_relation_size(indexrelid)) AS index_size
+    FROM pg_stat_user_indexes
+    WHERE indexrelname = '{index_name}';""")
+    results=cur.fetchall()
+    return results[0][1]

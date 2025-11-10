@@ -46,10 +46,25 @@ for max_cons in [4,8,16,32,64]:
         for dist_func in utils.dist_functions.keys():
             logger.set_context(f"hnsw_{dist_func}_{max_cons}_{ef_construction_multiplier}")
             allmetrics.build_hnsw_index(dist_func,max_cons,ef_construction_multiplier*max_cons,cur,logger)
+            logger.write(f"Memory {allmetrics.get_index_size("hnsw",cur)}")
 
             for topk in range(80,101,20):
                 logger.set_context(f"hnsw::{dist_func}[{topk}][{len(query_vectors)}]")
                 allmetrics.dist_query(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
                 hnsw_search_results[f"{topk}_{dist_func}"] = allmetrics.get_results(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
-        logger.set_context(f"hnsw_recall_{max_cons}_{ef_construction_multiplier}::{dist_func}[{topk}][{len(query_vectors)}]")
+        logger.set_context(f"hnsw_recall_{max_cons}_{ef_construction_multiplier}[{len(query_vectors)}]")
         utils.log_recall(exact_search_results,hnsw_search_results,logger)
+
+ivf_search_results = {}
+for ivf_list_count in [80,100,120]:
+    for dist_func in utils.dist_functions.keys():
+        logger.set_context(f"ivf_{dist_func}_{ivf_list_count}")
+        allmetrics.build_ivf_index(dist_func,ivf_list_count,cur,logger)
+        logger.write(f"Memory {allmetrics.get_index_size("ivf",cur)}")
+
+        for topk in range(80,101,20):
+            logger.set_context(f"ivf::{dist_func}[{topk}][{len(query_vectors)}]")
+            allmetrics.dist_query(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
+            ivf_search_results[f"{topk}_{dist_func}"] = allmetrics.get_results(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
+    logger.set_context(f"ivf_recall_{ivf_list_count}[{len(query_vectors)}]")
+    utils.log_recall(exact_search_results,ivf_search_results,logger)
