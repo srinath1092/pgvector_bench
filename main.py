@@ -25,7 +25,7 @@ conn = psycopg2.connect(
 )
 cur=conn.cursor()
 
-dataload.load_dataset(TABLE_NAME,SIFT_FILE,100,conn)
+dataload.load_dataset(TABLE_NAME,SIFT_FILE,10000,conn)
 
 # <-> - L2 distance
 # <#> - (negative) inner product
@@ -40,10 +40,11 @@ query_vectors = utils.read_fvecs(QUERY_FILE,100)
 logger:utils.clogger=utils.clogger("log.log")
 
 
-for topk in range(5,1000,20):
-    for dist_func in utils.dist_functions.keys():
-        logger.set_context(f"{dist_func}[{topk}][{len(query_vectors)}]")
-        allmetrics.dist_query(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
+# for topk in range(5,1000,20):
+#     for dist_func in utils.dist_functions.keys():
+#         logger.set_context(f"{dist_func}[{topk}][{len(query_vectors)}]")
+#         allmetrics.dist_query(query_vectors,topk,dist_func,cur,TABLE_NAME,logger)
+#
 
-
+allmetrics.dummy_index_build(cur,logger)
 

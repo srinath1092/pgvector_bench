@@ -20,5 +20,12 @@ def execute_for_time(query:str,cur:psycopg2.extensions.cursor,logger:utils.clogg
         if "Time" not in row[0]: continue
         logger.write(row[0])
 
+def execute_for_time_2(query:str,cur:psycopg2.extensions.cursor,logger:utils.clogger,args=()):
+    startTime=time.time()
+    cur.execute(f"{query}",args) 
+    cur.connection.commit()
+    endTime=time.time()
+    logger.write(endTime-startTime)
 
-
+def dummy_index_build(cur:psycopg2.extensions.cursor,logger:utils.clogger):
+    execute_for_time_2("CREATE INDEX ON sift1m USING hnsw (embedding vector_l2_ops);",cur,logger)
