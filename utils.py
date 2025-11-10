@@ -91,7 +91,7 @@ class clogger:
 
 def log_recall(truth,pred,logger:clogger):
     recall = {}
-    for key in truth.keys():
+    for key in pred.keys():
         corrects = 0
         recall_cur = 0
         for true_vecs,pred_vecs in zip(truth[key],pred[key]):
