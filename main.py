@@ -25,10 +25,10 @@ conn = psycopg2.connect(
 )
 cur=conn.cursor()
 
-dataload.load_dataset(TABLE_NAME,SIFT_FILE,100,conn)
+dataload.load_dataset(TABLE_NAME,SIFT_FILE,1000,conn)
 
 
-query_vectors = utils.read_fvecs(QUERY_FILE,10)
+query_vectors = utils.read_fvecs(QUERY_FILE,100)
 
 logger:utils.clogger=utils.clogger("log.log")
 
