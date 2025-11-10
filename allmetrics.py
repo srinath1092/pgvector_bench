@@ -13,6 +13,19 @@ def dist_query(query_vecs:np.ndarray,top_k_vecs:int,dist_func,cur:psycopg2.exten
             ORDER BY embedding {utils.dist_functions[dist_func]} %s
             LIMIT {top_k_vecs};""",cur,logger,args=(query_vector_string,))
 
+def get_results(query_vecs:np.ndarray,top_k_vecs:int,dist_func,cur:psycopg2.extensions.cursor,TABLE_NAME,logger:utils.clogger):
+    results = []
+    for vec in query_vecs:
+        query_vector_string = str(vec.tolist()) 
+        
+        cur.execute(f"""
+            SELECT id FROM {TABLE_NAME}
+            ORDER BY embedding <-> %s
+            LIMIT {top_k_vecs};
+        """, (query_vector_string,))
+        results.append(cur.fetchall())
+    return results
+
 def execute_for_time(query:str,cur:psycopg2.extensions.cursor,logger:utils.clogger,args=()):
     cur.execute(f"EXPLAIN (ANALYZE,BUFFERS) {query}",args) 
     print("executing ",query)

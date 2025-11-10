@@ -32,6 +32,7 @@ query_vectors = utils.read_fvecs(QUERY_FILE,100)
 
 logger:utils.clogger=utils.clogger("log.log")
 
+exact_search_results = {}
 
 for topk in range(5,1000,20):
     for dist_func in utils.dist_functions.keys():

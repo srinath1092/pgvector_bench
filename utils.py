@@ -88,3 +88,13 @@ class clogger:
     def write(self,obj):
         self._file.write(f"[{self._context}] {str(obj)}\n")
 
+
+def recall(truth,pred):
+    recall = {}
+    for key in truth.keys():
+        corrects = 0
+        recall = 0
+        for true_vecs,pred_vecs in zip(truth[key],pred[key]):
+            corrects = len(set(true_vecs) & set(pred_vecs))
+            recall += corrects/len(true_vecs)
+        recall = recall/len(truth[key])
