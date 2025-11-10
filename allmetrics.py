@@ -25,6 +25,17 @@ def dist_query_ivf(query_vecs:np.ndarray,top_k_vecs:int,dist_func,cur:psycopg2.e
             ORDER BY embedding {utils.dist_functions[dist_func]} %s
             LIMIT {top_k_vecs};""",cur,logger,args=(query_vector_string,))
 
+def dist_query_hnsw(query_vecs:np.ndarray,top_k_vecs:int,dist_func,cur:psycopg2.extensions.cursor,TABLE_NAME,logger:utils.clogger,ef_search):
+    cur.execute(f"""
+        SET hnsw.ef_search = {ef_search};
+    """)
+    for vec in query_vecs:
+        query_vector_string = str(vec.tolist()) 
+        execute_for_time(f"""
+            SELECT id FROM {TABLE_NAME}
+            ORDER BY embedding {utils.dist_functions[dist_func]} %s
+            LIMIT {top_k_vecs};""",cur,logger,args=(query_vector_string,))
+
 def get_results(query_vecs:np.ndarray,top_k_vecs:int,dist_func,cur:psycopg2.extensions.cursor,TABLE_NAME,logger:utils.clogger):
     results = []
     for vec in query_vecs:
@@ -42,6 +53,22 @@ def get_results_ivf(query_vecs:np.ndarray,top_k_vecs:int,dist_func,cur:psycopg2.
     results = []
     cur.execute(f"""
         SET ivfflat.probes = {nprobes};
+    """)
+    for vec in query_vecs:
+        query_vector_string = str(vec.tolist()) 
+        
+        cur.execute(f"""
+            SELECT id FROM {TABLE_NAME}
+            ORDER BY embedding {utils.dist_functions[dist_func]} %s
+            LIMIT {top_k_vecs};
+        """, (query_vector_string,))
+        results.append(cur.fetchall())
+    return results
+
+def get_results_hnsw(query_vecs:np.ndarray,top_k_vecs:int,dist_func,cur:psycopg2.extensions.cursor,TABLE_NAME,logger:utils.clogger,ef_search):
+    results = []
+    cur.execute(f"""
+        SET hnsw.ef_search = {ef_search};
     """)
     for vec in query_vecs:
         query_vector_string = str(vec.tolist()) 
